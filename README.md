@@ -1,7 +1,7 @@
 # Spell🐝 Python CLI App
 
 How good are you at spelling?  
-Try this Python command-line Spell🐝 app to find out!
+Try this Python-powered interactive Spell🐝 app to find out!
 
 ## Installation
 
