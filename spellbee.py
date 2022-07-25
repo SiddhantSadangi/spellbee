@@ -77,7 +77,11 @@ def run(words: list, score: int = 0) -> None:
         if Confirm.ask("Play again?"):
             run(words, 0)
         else:
-            print("[bold]Bye bye!")
+            print()
+            print("If you enjoyed this app, please consider buying me a coffee:")
+            print("https://www.buymeacoffee.com/siddhantsadangi")
+            print("[bold]Bye bye. See you soon!")
+            print()
 
 
 # ---------- RUN ---------
