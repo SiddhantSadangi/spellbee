@@ -1,4 +1,4 @@
-# SpellBee Python command-line app
+# SpellBee CLI app
 # Copyright (C) 2022  Siddhant Sadangi (siddhant.sadangi@gmail.com)
 # A copy of the GNU General Public License is attached with this program.
 
@@ -95,7 +95,7 @@ if __name__ == "__main__":
 
     print(
         Panel.fit(
-            """SpellBee Python command-line app
+            """SpellBee CLI app
 Copyright (C) 2022  Siddhant Sadangi (siddhant.sadangi@gmail.com)
 This program comes with ABSOLUTELY NO WARRANTY.
 This is free software, and you are welcome to redistribute it
