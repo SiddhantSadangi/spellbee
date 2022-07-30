@@ -7,7 +7,7 @@ Try this interactive Spell🐝 app to find out!
 
 ### Windows
 
-Just download and run the `spellbee.exe` file
+Just download and run the [spellbee.exe](https://github.com/SiddhantSadangi/spellbee/raw/main/spellbee.exe) file
 
 ### Other platforms
 
