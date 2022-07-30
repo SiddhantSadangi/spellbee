@@ -1,29 +1,44 @@
-# Spell🐝 Python CLI App
+# Spell🐝 CLI App
 
 How good are you at spelling?  
-Try this Python-powered interactive Spell🐝 app to find out!
-
-## Installation
-
-```bash
-  git clone https://github.com/siddhantsadangi/spellbee
-  cd SpellBee
-  pip install -r requirements.txt 
-```
+Try this interactive Spell🐝 app to find out!
 
 ## Usage
 
-1. Increase volume or wear headphones
-2. Open a terminal, and run the below
+### Windows
+
+Just download and run the `spellbee.exe` file
+
+### Other platforms
+
+You will need to download and build from the source.
+
+1. Installation
+
+    ```bash
+    git clone https://github.com/siddhantsadangi/spellbee
+    cd SpellBee
+    pip install -r requirements.txt 
+    ```
+
+2. Usage
 
     ```bash
     python .\spellbee.py
     ```
 
-3. You will hear a word. Enter the spelling. You can also enter "d" to get the definition (if available), or "r" to hear the word again, slowly
-4. Repeat till you get a word wrong. Your final score will be displayed and you'll be asked if you want to play again.
+3. Create executable (optional)
+
+    i. Install [pyinstaller](https://pyinstaller.org/en/stable/)  
+    ii. Run the below command in the terminal
+
+    ```bash
+    pyinstaller --distpath . -i .\icon.ico -F --add-data 'words.txt;.' .\spellbee.py
+    ```
 
 ## Known issues
+
+* Some words are missing from the `PyDictionary()` corpus. Their definitions cannot be fetched
 
 * `metadata-generation-failed` error while installing `PyDictionary()` -
 Please install `PyDictionary()` using the below command:
@@ -31,8 +46,6 @@ Please install `PyDictionary()` using the below command:
     ```bash
     pip install PyDictionary --use-deprecated=backtrack-on-build-failures
     ```
-
-* Some words are missing from the `PyDictionary()` corpus. Their definitions cannot be fetched
 
 To report bugs, please create an [issue](https://github.com/SiddhantSadangi/spellbee/issues/new).
 

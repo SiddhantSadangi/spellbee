@@ -5,6 +5,7 @@
 import json
 import random
 import os
+import sys
 from gtts import gTTS
 from PyDictionary import PyDictionary
 from playsound import playsound
@@ -15,6 +16,17 @@ from rich.panel import Panel
 dictionary = PyDictionary()
 
 
+def resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
+
+
 def play(word: str, slow: bool = False) -> None:
     """Pronounces `word`
 
@@ -23,10 +35,10 @@ def play(word: str, slow: bool = False) -> None:
         slow (bool, optional): Pronounces `word` slowly. Defaults to False.
     """
 
-    t1 = gTTS(word, slow=slow)
+    translated = gTTS(word, slow=slow)
     if os.path.exists("audio.mp3"):
         os.remove("audio.mp3")
-    t1.save("audio.mp3")
+    translated.save("audio.mp3")
     return playsound("audio.mp3")
 
 
@@ -43,28 +55,20 @@ def run(words: list, score: int = 0) -> None:
     words.remove(word)
     play(word)
 
-    answer = (
-        Prompt.ask(
-            '[bold]Enter spelling[/] ([italic]type "d" to get the definition or "r" to hear again, slowly[/])'
-        )
-        .lower()
-        .strip()
-    )
+    answer = Prompt.ask("[bold]Enter spelling").lower().strip()
 
-    while answer in ["d", "r"]:
+    while answer in ["d", "r", "l"]:
 
         if answer == "d":
             if meaning := dictionary.meaning(word, disable_errors=True):
                 print(meaning)
             else:
                 print("[red]Sorry, definition is not available")
-        else:
+        elif answer == "r":
             play(word, slow=True)
-        answer = (
-            Prompt.ask('Enter spelling ([italic]type "r" to repeat slowly[/])')
-            .lower()
-            .strip()
-        )
+        else:
+            print(f"[italics]No. of letters: {len(word)}")
+        answer = Prompt.ask("[bold]Enter spelling").lower().strip()
 
     if answer == word:
         score += 1
@@ -77,16 +81,37 @@ def run(words: list, score: int = 0) -> None:
         if Confirm.ask("Play again?"):
             run(words, 0)
         else:
-            print()
-            print("If you enjoyed this app, please consider buying me a coffee:")
+            print("\nIf you enjoyed this app, please consider buying me a coffee:")
             print("https://www.buymeacoffee.com/siddhantsadangi")
-            print("[bold]Bye bye. See you soon!")
-            print()
+            print("[bold]Bye bye. See you soon ✨")
+            input("\nPress any key to exit")
+
+            if os.path.exists("audio.mp3"):
+                os.remove("audio.mp3")
 
 
 # ---------- RUN ---------
+if __name__ == "__main__":
 
-with open("words.txt", "r") as f:
-    words = json.load(f)
+    print(
+        Panel.fit(
+            """SpellBee Python command-line app
+Copyright (C) 2022  Siddhant Sadangi (siddhant.sadangi@gmail.com)
+This program comes with ABSOLUTELY NO WARRANTY.
+This is free software, and you are welcome to redistribute it
+under certain conditions."""
+        )
+    )
 
-run(words)
+    print(
+        """[bold]During the course of the game, enter:\n
+* 'd' to view the dictionary definition of the word,
+* 'l' to get the number of letters in the word,
+* 'r' to repeat the word slowly."""
+    )
+    input("\nPress any key to start")
+
+    with open(resource_path("words.txt"), "r", encoding="utf8") as f:
+        words = json.load(f)
+
+    run(words)
