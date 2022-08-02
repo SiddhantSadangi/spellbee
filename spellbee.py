@@ -6,6 +6,7 @@ import json
 import random
 import os
 import sys
+
 from gtts import gTTS
 from PyDictionary import PyDictionary
 from playsound import playsound
@@ -14,6 +15,18 @@ from rich.prompt import Prompt, Confirm
 from rich.panel import Panel
 
 dictionary = PyDictionary()
+
+
+def clean_and_exit():
+    print("\nIf you enjoyed this app, please consider buying me a coffee:")
+    print("https://www.buymeacoffee.com/siddhantsadangi")
+    print("[bold]Bye bye. See you soon ✨")
+    input("\nPress any key to exit")
+
+    if os.path.exists("audio.mp3"):
+        os.remove("audio.mp3")
+
+    sys.exit()
 
 
 def resource_path(relative_path):
@@ -57,7 +70,7 @@ def run(words: list, score: int = 0) -> None:
 
     answer = Prompt.ask("[bold]Enter spelling").lower().strip()
 
-    while answer in ["d", "r", "l"]:
+    while answer in ["d", "r", "l", "e"]:
 
         if answer == "d":
             if meaning := dictionary.meaning(word, disable_errors=True):
@@ -66,8 +79,10 @@ def run(words: list, score: int = 0) -> None:
                 print("[red]Sorry, definition is not available")
         elif answer == "r":
             play(word, slow=True)
-        else:
+        elif answer == "l":
             print(f"[italics]No. of letters: {len(word)}")
+        else:
+            clean_and_exit()
         answer = Prompt.ask("[bold]Enter spelling").lower().strip()
 
     if answer == word:
@@ -81,13 +96,7 @@ def run(words: list, score: int = 0) -> None:
         if Confirm.ask("Play again?"):
             run(words, 0)
         else:
-            print("\nIf you enjoyed this app, please consider buying me a coffee:")
-            print("https://www.buymeacoffee.com/siddhantsadangi")
-            print("[bold]Bye bye. See you soon ✨")
-            input("\nPress any key to exit")
-
-            if os.path.exists("audio.mp3"):
-                os.remove("audio.mp3")
+            clean_and_exit()
 
 
 # ---------- RUN ---------
@@ -104,11 +113,13 @@ under certain conditions."""
     )
 
     print(
-        """[bold]During the course of the game, enter:\n
+        """[bold]\nDuring the course of the game, enter:\n
 * 'd' to view the dictionary definition of the word,
 * 'l' to get the number of letters in the word,
-* 'r' to repeat the word slowly."""
+* 'r' to repeat the word slowly,
+* 'e' to exit."""
     )
+
     input("\nPress any key to start")
 
     with open(resource_path("words.txt"), "r", encoding="utf8") as f:
