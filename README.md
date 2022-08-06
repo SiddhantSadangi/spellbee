@@ -3,6 +3,10 @@
 How good are you at spelling?  
 Try this interactive Spell🐝 app to find out!
 
+## Preview
+
+https://user-images.githubusercontent.com/41324509/183246633-8e3ba88e-fb46-4349-9099-70f87a12a125.mp4
+
 ## Usage
 
 ### Windows
