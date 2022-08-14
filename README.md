@@ -19,7 +19,7 @@ The CLI app is faster, but the GUI app is slightly smaller and more user-friendl
 Just download and run the executables from the below link:
 |CLI|GUI
 |:-:|:-:
-|[spellbee_cli.exe](https://github.com/SiddhantSadangi/spellbee/raw/main/cli/spellbee_cli.exe)|[spellbee_gui.exe](https://github.com/SiddhantSadangi/spellbee/raw/main/cli/spellbee_gui.exe)
+|[spellbee_cli.exe](https://github.com/SiddhantSadangi/spellbee/raw/main/cli/spellbee_cli.exe)|[spellbee_gui.exe](https://github.com/SiddhantSadangi/spellbee/raw/main/gui/spellbee_gui.exe)
 
 ### Other platforms
 
