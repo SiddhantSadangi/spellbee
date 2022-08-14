@@ -1,4 +1,0 @@
-gTTS==2.2.4
-playsound==1.2.2
-rich==12.5.1
-PyDictionary==2.0.1

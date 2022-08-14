@@ -1,17 +1,25 @@
-# Spell🐝 CLI App
+# 🐝 Spellbee App
 
 How good are you at spelling?  
-Try this interactive Spell🐝 app to find out!
-
-## Preview
-
-https://user-images.githubusercontent.com/41324509/183246633-8e3ba88e-fb46-4349-9099-70f87a12a125.mp4
+Try this interactive Spellbee app to find out!
 
 ## Usage
 
+There are two versions of this app - command-line (CLI) and graphical (GUI).  
+The CLI app is faster, but the GUI app is slightly smaller and more user-friendly.  
+
+|CLI|GUI
+|:-:|:-:
+|![cli](https://user-images.githubusercontent.com/41324509/184543236-a14c2567-68fb-453c-bdd5-49c01f251b6c.png)|![gui](https://user-images.githubusercontent.com/41324509/184543285-222e7c2c-7be1-48fc-8c76-0c0da5dc97f8.png)
+
+:warning: Both interfaces require internet access to run.
+
 ### Windows
 
-Just download and run the [spellbee.exe](https://github.com/SiddhantSadangi/spellbee/raw/main/spellbee.exe) file
+Just download and run the executables from the below link:
+|CLI|GUI
+|:-:|:-:
+|[spellbee_cli.exe](https://github.com/SiddhantSadangi/spellbee/raw/main/cli/spellbee_cli.exe)|[spellbee_gui.exe](https://github.com/SiddhantSadangi/spellbee/raw/main/cli/spellbee_gui.exe)
 
 ### Other platforms
 
@@ -21,7 +29,7 @@ You will need to download and build from the source.
 
     ```bash
     git clone https://github.com/siddhantsadangi/spellbee
-    cd SpellBee
+    cd SpellBee\<cli/gui> # Use `cli` or `gui` 
     pip install -r requirements.txt 
     ```
 
@@ -29,15 +37,6 @@ You will need to download and build from the source.
 
     ```bash
     python .\spellbee.py
-    ```
-
-3. Create executable (optional)
-
-    i. Install [pyinstaller](https://pyinstaller.org/en/stable/)  
-    ii. Run the below command in the terminal
-
-    ```bash
-    pyinstaller --distpath . -i .\icon.ico -F --add-data 'words.txt;.' .\spellbee.py
     ```
 
 ## Known issues
