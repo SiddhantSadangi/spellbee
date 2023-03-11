@@ -1,4 +1,5 @@
-gTTS==2.2.4
+futures<3.0.0
+gTTS
 playsound==1.2.2
-PyDictionary==2.0.1
-rich==12.5.1
+PyDictionary
+rich
