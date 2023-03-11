@@ -1,5 +1,5 @@
 # Spellbee CLI app
-# Copyright (C) 2022  Siddhant Sadangi (siddhant.sadangi@gmail.com)
+# Copyright (C) 2023  Siddhant Sadangi (siddhant.sadangi@gmail.com)
 # This is a free software distributed under GPL v3.
 
 import json
@@ -14,7 +14,7 @@ from rich import print
 from rich.panel import Panel
 from rich.prompt import Confirm, Prompt
 
-VERSION = "0.2.2"
+VERSION = "0.3.0"
 
 dictionary = PyDictionary()
 
@@ -49,7 +49,9 @@ def play(word: str, slow: bool = False) -> None:
             getattr(e, "message", repr(e))
             == "gTTSError('Failed to connect. Probable cause: Unknown')"
         ):
-            print("[bold red]Cannot connect to the internet. Please check your connection.")
+            print(
+                "[bold red]Cannot connect to the internet. Please check your connection."
+            )
             if Confirm.ask("Retry?"):
                 play(word)
             else:
@@ -67,19 +69,23 @@ def run(words: list, score: int = 0) -> None:
         score (int, optional): Current score. Defaults to 0.
     """
 
+    print("[yellow]Fetching word...")
+
     word = random.choice(words)
     words.remove(word)
-    play(word)
+    if meaning_dict := dictionary.meaning(word, disable_errors=True):
+        play(word)
+    else:
+        run(words, score)
 
     answer = Prompt.ask("\n[bold]Enter spelling").lower().strip()
 
     while answer in ["d", "r", "l", "e"]:
 
         if answer == "d":
-            if meaning_dict := dictionary.meaning(word, disable_errors=True):
-                print("\n".join(f"{item}:{meaning}" for item, meaning in meaning_dict.items()))
-            else:
-                print("[red]Sorry, definition is not available")
+            print(
+                "\n".join(f"{item}:{meaning}" for item, meaning in meaning_dict.items())
+            )
         elif answer == "r":
             play(word, slow=True)
         elif answer == "l":
@@ -108,7 +114,7 @@ if __name__ == "__main__":
     print(
         Panel.fit(
             f"""Spellbee CLI app v{VERSION}
-Copyright (C) 2022  Siddhant Sadangi
+Copyright (C) 2023  Siddhant Sadangi
 siddhant.sadangi@gmail.com | linkedin.com/in/siddhantsadangi
 This is a free software distributed under GPL v3."""
         )
@@ -125,7 +131,9 @@ This is a free software distributed under GPL v3."""
     input("\nPress any key to start")
 
     with open(
-        path.join(path.abspath(path.dirname(__file__)), "words.txt"), "r", encoding="utf8"
+        path.join(path.abspath(path.dirname(__file__)), "words.txt"),
+        "r",
+        encoding="utf8",
     ) as f:
         words = json.load(f)
 

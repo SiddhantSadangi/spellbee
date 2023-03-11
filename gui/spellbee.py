@@ -1,5 +1,5 @@
 # Spellbee GUI app
-# Copyright (C) 2022  Siddhant Sadangi (siddhant.sadangi@gmail.com)
+# Copyright (C) 2023  Siddhant Sadangi (siddhant.sadangi@gmail.com)
 # A copy of the GNU General Public License is attached with this program.
 
 import json
@@ -7,13 +7,24 @@ import random
 import webbrowser
 from os import path, remove
 from textwrap import wrap
-from tkinter import DISABLED, END, HORIZONTAL, NORMAL, NSEW, Button, Label, StringVar, Tk, ttk
+from tkinter import (
+    DISABLED,
+    END,
+    HORIZONTAL,
+    NORMAL,
+    NSEW,
+    Button,
+    Label,
+    StringVar,
+    Tk,
+    ttk,
+)
 
 from gtts import gTTS
 from playsound import playsound
 from PyDictionary import PyDictionary
 
-VERSION = "0.1.0"
+VERSION = "0.2.0"
 
 dictionary = PyDictionary()
 used_words = []
@@ -65,20 +76,26 @@ def get_word():
     if play["text"] in ["Hear word", "Restart"]:
         word = random.choice(words)
         words.remove(word)
+        check_if_exists(word)
         used_words.append(word)
         return word
 
     return used_words[-1]
 
 
+def check_if_exists(word):
+    global meaning
+    meaning = dictionary.meaning(word, disable_errors=True)
+    if not meaning:
+        get_word()
+
+
 def get_definition(word):
-    if meaning := dictionary.meaning(word, disable_errors=True):
-        definition.config(
-            text="\n".join(wrap(str(meaning), width=60)),
-            fg="black",
-        )
-    else:
-        definition.config(text="Definition not available", fg="red")
+    definition.config(
+        text="\n".join(wrap(str(meaning), width=60)),
+        fg="black",
+    )
+
     define["state"] = DISABLED
 
 
@@ -125,7 +142,9 @@ def click_button(_):
 score = 0
 
 # Load words
-with open(path.join(path.abspath(path.dirname(__file__)), "words.txt"), "r", encoding="utf8") as f:
+with open(
+    path.join(path.abspath(path.dirname(__file__)), "words.txt"), "r", encoding="utf8"
+) as f:
     words = json.load(f)
 
 root = Tk()
@@ -232,7 +251,7 @@ s.grid(column=0, columnspan=3, row=6)
 
 cpl = Label(
     mainframe,
-    text="""Copyright © 2022  Siddhant Sadangi.
+    text="""Copyright © 2023  Siddhant Sadangi.
 This is a free software distributed under GPL v3.
 siddhant.sadangi@gmail.com | linkedin.com/in/siddhantsadangi""",
     fg="#545961",
@@ -250,7 +269,8 @@ bmac = Label(
 bmac.config(font=("Arial", 8))
 bmac.grid(column=0, columnspan=3, row=8)
 bmac.bind(
-    "<Button-1>", lambda e: webbrowser.open_new("https://www.buymeacoffee.com/siddhantsadangi")
+    "<Button-1>",
+    lambda e: webbrowser.open_new("https://www.buymeacoffee.com/siddhantsadangi"),
 )
 
 # Configuring grid

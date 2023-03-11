@@ -1,12 +1,12 @@
 # 🐝 Spellbee App
 
-How good are you at spelling?  
+How good are you at spelling?
 Try this interactive Spellbee app to find out!
 
 ## Usage
 
-There are two versions of this app - command-line (CLI) and graphical (GUI).  
-The CLI app is faster, but the GUI app is slightly smaller and more user-friendly.  
+There are two versions of this app - command-line (CLI) and graphical (GUI).
+The CLI app is faster, but the GUI app is slightly smaller and more user-friendly.
 
 |CLI|GUI
 |:-:|:-:
@@ -29,8 +29,8 @@ You will need to download and build from the source.
 
     ```bash
     git clone https://github.com/siddhantsadangi/spellbee
-    cd SpellBee\<cli/gui> # Use `cli` or `gui` 
-    pip install -r requirements.txt 
+    cd SpellBee\<cli/gui> # Use `cli` or `gui`
+    pip install -r requirements.txt
     ```
 
 2. Usage
@@ -39,22 +39,9 @@ You will need to download and build from the source.
     python .\spellbee.py
     ```
 
-## Known issues
+### :wrench: To report bugs, please create an [issue](https://github.com/SiddhantSadangi/spellbee/issues/new)
 
-* Some words are missing from the `PyDictionary()` corpus. Their definitions cannot be fetched
-
-* `metadata-generation-failed` error while installing `PyDictionary()` -
-Please install `PyDictionary()` using the below command:
-
-    ```bash
-    pip install PyDictionary --use-deprecated=backtrack-on-build-failures
-    ```
-
-To report bugs, please create an [issue](https://github.com/SiddhantSadangi/spellbee/issues/new).
-
-To submit feedback, please reach out to me
-at [siddhant.sadangi@gmail.com](mailto:siddhant.sadangi@gmail.com) and/or connect with me
-on [LinkedIn](https://linkedin.com/in/siddhantsadangi).
+### :email: To submit feedback, please reach out to me at [siddhant.sadangi@gmail.com](mailto:siddhant.sadangi@gmail.com) and/or connect with me on [LinkedIn](https://linkedin.com/in/siddhantsadangi)
 
 <p align="center">
     <a href="https://www.buymeacoffee.com/siddhantsadangi" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;">
