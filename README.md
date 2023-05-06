@@ -5,23 +5,28 @@ Try this interactive Spellbee app to find out!
 
 ## Usage
 
-There are two versions of this app - command-line (CLI) and graphical (GUI).
+There are three interfaces of this app - Streamlit, command-line (CLI), and graphical (GUI).  
+The Streamlit application can be run online, while the other two need to be downloaded.
 The CLI app is faster, but the GUI app is slightly smaller and more user-friendly.
 
-|CLI|GUI
-|:-:|:-:
-|![cli](https://user-images.githubusercontent.com/41324509/184543236-a14c2567-68fb-453c-bdd5-49c01f251b6c.png)|![gui](https://user-images.githubusercontent.com/41324509/184543285-222e7c2c-7be1-48fc-8c76-0c0da5dc97f8.png)
+|Streamlit|CLI|GUI
+|:-:|:-:|:-:
+|![streamlit](https://user-images.githubusercontent.com/41324509/236699782-1176e4b1-0ac8-4e1d-8b92-f3c5759b2f4e.png)|![cli](https://user-images.githubusercontent.com/41324509/184543236-a14c2567-68fb-453c-bdd5-49c01f251b6c.png)|![gui](https://user-images.githubusercontent.com/41324509/184543285-222e7c2c-7be1-48fc-8c76-0c0da5dc97f8.png)
 
-:warning: Both interfaces require internet access to run.
+:warning: All interfaces require internet access to run.
 
-### Windows
+### Streamlit
+[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://spellbee.streamlit.app/)
+
+### CLI/GUI
+#### Windows
 
 Just download and run the executables from the below link:
 |CLI|GUI
 |:-:|:-:
 |[spellbee_cli.exe](https://github.com/SiddhantSadangi/spellbee/raw/main/cli/spellbee_cli.exe)|[spellbee_gui.exe](https://github.com/SiddhantSadangi/spellbee/raw/main/gui/spellbee_gui.exe)
 
-### Other platforms
+#### Other platforms
 
 You will need to download and build from the source.
 

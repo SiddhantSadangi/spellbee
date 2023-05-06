@@ -3,15 +3,16 @@ import random
 import os
 
 from gtts import gTTS
-from playsound import playsound
+from PyDictionary import PyDictionary
 
 import streamlit as st
 
+dictionary = PyDictionary()
 VERSION = "0.1.0"
 
 st.set_page_config(
     page_title="Spellbee",
-    page_icon="../icon.ico",
+    page_icon="icon.ico",
     menu_items={
         "About": f"Spellbee 🐝 v{VERSION}  "
         f"\nApp contact: [Siddhant Sadangi](mailto:siddhant.sadangi@gmail.com)",
@@ -21,94 +22,207 @@ st.set_page_config(
 )
 
 # ---------- SIDEBAR ----------
-with open("sidebar.html", "r", encoding="UTF-8") as sidebar_file:
+with open("Streamlit/sidebar.html", "r", encoding="UTF-8") as sidebar_file:
     sidebar_html = sidebar_file.read().replace("{VERSION}", VERSION)
 
 with st.sidebar:
-    st.components.v1.html(sidebar_html, height=400)
+    with st.expander("Instructions", expanded=True):
+        st.info(
+            '1. Click on "Get word" to load a new word\n'
+            '2. Once word is loaded, click on the ▶️ button next to "Get word" to hear the word in normal speed\n'
+            '3. Click on the ▶️ button next to "Hear slowly" to hear the word in slow speed\n'
+            '4. Type the spelling in the text box and press "Enter" to evaluate\n'
+            "5. If the answer is correct, repeat from step 1. Else restart."
+        )
+        st.warning(
+            "Once you have started entering an answer, do not click anywhere else on the screen before completing."
+        )
+    st.components.v1.html(sidebar_html, height=450)
 
 # ---------- HEADER ----------
 st.title("Welcome to Spellbee 🐝!")
 
+
 # --- SELECT AND PLAY WORD ----
-def play(word: str, slow: bool = False) -> None:
+def _play(word: str) -> None:
     """Pronounces `word`
 
     Args:
-        word (str): Word to be pronounced
+        word (str): Word to be pronounced.
         slow (bool, optional): Pronounces `word` slowly. Defaults to False.
     """
 
-    t1 = gTTS(word, slow=True)
-    if os.path.exists("audio.mp3"):
-        os.remove("audio.mp3")
-    t1.save("audio.mp3")
-    return playsound("audio.mp3")
+    fast = gTTS(text=word, lang_check=False)
+    if os.path.exists("Streamlit/fast.mp3"):
+        os.remove("Streamlit/fast.mp3")
+    fast.save("Streamlit/fast.mp3")
+
+    slow = gTTS(text=word, slow=True, lang_check=False)
+    if os.path.exists("Streamlit/slow.mp3"):
+        os.remove("Streamlit/slow.mp3")
+    slow.save("Streamlit/slow.mp3")
+
+
+# --------- RESTART ----------
+def _set_session_states():
+    st.session_state["used_words"] = []
+    st.session_state["score"] = 0
+    st.session_state["disabled"] = dict(
+        hear=False,
+        get_length=True,
+        define=True,
+    )
+    st.session_state["persist_audio"] = st.session_state[
+        "persist_definition"
+    ] = st.session_state["persist_length"] = False
 
 
 # --------- SCORE ---------
-def iscorrect(word: str, answer: str) -> bool:
-
-    if answer == word:
+def _iscorrect() -> None:
+    if st.session_state.answer == st.session_state["used_words"][-1]:
         st.success("Correct!")
-        return True
+        st.session_state.disabled["hear"] = False
+        st.session_state["score"] += 1
+
     else:
-        st.error(f"Wrong answer. Correct spelling is {word}")
-        return False
+        st.error(
+            f"Wrong answer. Correct spelling is \"{st.session_state['used_words'][-1]}\""
+        )
+        st.subheader(f"Final score: {st.session_state['score']}")
+
+        st.session_state.disabled["hear"] = True
+
+        st.button(
+            "Restart",
+            use_container_width=True,
+            type="primary",
+            on_click=_set_session_states,
+        )
+
+    st.session_state.disabled["get_length"] = st.session_state.disabled["define"] = True
+    st.session_state.persist_audio = (
+        st.session_state.persist_definition
+    ) = st.session_state.persist_length = False
+    st.write(
+        f"__Words correctly spelled__: {', '.join(st.session_state['used_words'][:st.session_state.score])}"
+    )
 
 
 # ---------- INITIALIZING ----------
 if "words" not in st.session_state:
-    with open("words.txt", "r") as f:
+    with open("Streamlit/words.txt", "r") as f:
         st.session_state["words"] = json.load(f)
 
-    st.session_state["used_words"] = []
-
-st.session_state["used_words"]
-
-# Function to update the value in session state
-def started(button):
-    st.session_state.clicked[button] = True
-    st.session_state.disabled = True
+    _set_session_states()
 
 
-if "start" not in st.session_state:
-    st.session_state.disabled = False
+def _disable_widget():
+    st.session_state.disabled = dict(
+        hear=True,
+        get_length=False,
+        define=False,
+    )
+    st.session_state.persist_audio = True
 
-st.button(
-    "Start",
-    on_click=started,
-    args=[1],
-    key="start",
-    disabled=st.session_state.disabled,
+
+def _persist_length():
+    st.session_state["persist_length"] = st.session_state.disabled["get_length"] = True
+
+
+def _persist_definition():
+    st.session_state["persist_definition"] = st.session_state.disabled["define"] = True
+
+
+def _get_word():
+    word = random.choice(st.session_state["words"])
+    if meaning_dict := dictionary.meaning(word, disable_errors=True):
+        st.session_state["used_words"].append(word)
+        st.session_state["words"].remove(word)
+        st.session_state.meaning = meaning_dict
+        _play(word)
+    else:
+        _get_word()
+
+
+st.subheader(f"Score: {st.session_state['score']}")
+
+r1c1, r1c2 = st.columns([1, 2])
+
+r1c1.button(
+    "Get word",
+    on_click=_disable_widget,
+    key="hear",
+    type="primary",
+    disabled=st.session_state.disabled["hear"],
+    use_container_width=True,
 )
 
-lcol, _ = st.columns(2)
-st.subheader(f"Score: {len(st.session_state['used_words'])}")
+r2c1, r2c2 = st.columns([1, 2])
 
+r2c1.button(
+    "Hear slowly",
+    key="repeat",
+    disabled=True,
+    use_container_width=True,
+)
 
-# Initialize the key in session state
-if "clicked" not in st.session_state:
-    st.session_state.clicked = {1: False, 2: False}
+r3c1, r3c2 = st.columns([1, 2])
 
+r3c1.button(
+    "Get word length",
+    on_click=_persist_length,
+    key="get_length",
+    disabled=st.session_state.disabled["get_length"],
+    use_container_width=True,
+)
 
-if st.session_state.clicked[1]:
-    st.session_state["used_words"].append(random.choice(st.session_state["words"]))
-    st.session_state["words"].remove(st.session_state["used_words"][-1])
+r4c1, r4c2 = st.columns([1, 2])
 
-    play(st.session_state["used_words"][-1])
+r4c1.button(
+    "Get definition",
+    on_click=_persist_definition,
+    key="define",
+    disabled=st.session_state.disabled["define"],
+    use_container_width=True,
+)
+
+if any(
+    [
+        st.session_state.persist_audio,
+        st.session_state.persist_length,
+        st.session_state.persist_definition,
+        st.session_state.get_length,
+        st.session_state.hear,
+    ]
+):
+    if st.session_state.hear:
+        _get_word()
+
+    word = st.session_state["used_words"][-1]
+
+    if st.session_state.persist_audio:
+        r1c2.audio("Streamlit/fast.mp3", format="audio/mp3")
+        r2c2.audio("Streamlit/slow.mp3", format="audio/mp3")
+
+    if st.session_state.persist_length:
+        r3c2.markdown(
+            f'<span style="font-weight:700;font-size:20px">{len(word)}</span>',
+            unsafe_allow_html=True,
+        )
+
+    if st.session_state.persist_definition:
+        r4c2.markdown(
+            "<br>".join(
+                f"{item}: {meaning}"
+                for item, meaning in st.session_state.meaning.items()
+            ),
+            unsafe_allow_html=True,
+        )
 
     st.text_input(
         "Type spelling and press enter to evaluate",
-        key=st.session_state["used_words"][-1],
+        key="answer",
+        on_change=_iscorrect,
     ).lower().strip()
 
-    print(st.session_state[st.session_state["used_words"][-1]])
-    if st.session_state[st.session_state["used_words"][-1]]:
-        if not iscorrect(
-            st.session_state["used_words"][-1], st.session_state[st.session_state["used_words"][-1]]
-        ):
-            print("incorrect")
-            st.session_state["used_words"] = []
-        else:
-            print("correct")
+    # Nothing after this will be executed
