@@ -8,7 +8,7 @@ from PyDictionary import PyDictionary
 import streamlit as st
 
 dictionary = PyDictionary()
-VERSION = "0.1.0"
+VERSION = "0.1.1"
 
 st.set_page_config(
     page_title="Spellbee",
@@ -78,8 +78,8 @@ def _set_session_states():
 
 
 # --------- SCORE ---------
-def _iscorrect() -> None:
-    if st.session_state.answer == st.session_state["used_words"][-1]:
+def _evaluate() -> None:
+    if st.session_state.answer.lower().strip() == st.session_state["used_words"][-1]:
         st.success("Correct!")
         st.session_state.disabled["hear"] = False
         st.session_state["score"] += 1
@@ -222,7 +222,7 @@ if any(
     st.text_input(
         "Type spelling and press enter to evaluate",
         key="answer",
-        on_change=_iscorrect,
-    ).lower().strip()
+        on_change=_evaluate,
+    )
 
     # Nothing after this will be executed
