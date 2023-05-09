@@ -26,7 +26,7 @@ with open("Streamlit/sidebar.html", "r", encoding="UTF-8") as sidebar_file:
     sidebar_html = sidebar_file.read().replace("{VERSION}", VERSION)
 
 with st.sidebar:
-    with st.expander("Instructions", expanded=True):
+    with st.expander("Instructions"):
         st.info(
             '1. Click on "Get word" to load a new word\n'
             '2. Once word is loaded, click on the ▶️ button next to "Get word" to hear the word in normal speed\n'
