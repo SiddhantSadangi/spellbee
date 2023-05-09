@@ -8,7 +8,7 @@ from PyDictionary import PyDictionary
 import streamlit as st
 
 dictionary = PyDictionary()
-VERSION = "0.1.1"
+VERSION = "0.1.2"
 
 st.set_page_config(
     page_title="Spellbee",
@@ -201,8 +201,8 @@ if any(
     word = st.session_state["used_words"][-1]
 
     if st.session_state.persist_audio:
-        r1c2.audio("Streamlit/fast.mp3", format="audio/mp3")
-        r2c2.audio("Streamlit/slow.mp3", format="audio/mp3")
+        r1c2.audio("Streamlit/fast.mp3", format="audio/mpeg")
+        r2c2.audio("Streamlit/slow.mp3", format="audio/mpeg")
 
     if st.session_state.persist_length:
         r3c2.markdown(
