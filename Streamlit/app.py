@@ -8,7 +8,7 @@ from PyDictionary import PyDictionary
 import streamlit as st
 
 dictionary = PyDictionary()
-VERSION = "0.1.2"
+VERSION = "0.1.3"
 
 st.set_page_config(
     page_title="Spellbee",
@@ -66,6 +66,7 @@ def _play(word: str) -> None:
 # --------- RESTART ----------
 def _set_session_states():
     st.session_state["used_words"] = []
+    st.session_state["correct_words"] = []
     st.session_state["score"] = 0
     st.session_state["disabled"] = dict(
         hear=False,
@@ -82,6 +83,7 @@ def _evaluate() -> None:
     if st.session_state.answer.lower().strip() == st.session_state["used_words"][-1]:
         st.success("Correct!")
         st.session_state.disabled["hear"] = False
+        st.session_state["correct_words"].append(st.session_state["used_words"][-1])
         st.session_state["score"] += 1
 
     else:
@@ -104,7 +106,7 @@ def _evaluate() -> None:
         st.session_state.persist_definition
     ) = st.session_state.persist_length = False
     st.write(
-        f"__Words correctly spelled__: {', '.join(st.session_state['used_words'][:st.session_state.score])}"
+        f"__Words correctly spelled__: {', '.join(st.session_state['correct_words'])}"
     )
 
 
