@@ -5,7 +5,7 @@ Try this interactive Spellbee app to find out!
 
 ## Usage
 
-There are three interfaces of this app - Streamlit, command-line (CLI), and graphical (GUI).  
+There are three interfaces of this app - Streamlit, command-line (CLI) (deprecated), and graphical (GUI) (deprecated).  
 The Streamlit application can be run online, while the other two need to be downloaded.
 The CLI app is faster, but the GUI app is slightly smaller and more user-friendly.
 
@@ -18,7 +18,7 @@ The CLI app is faster, but the GUI app is slightly smaller and more user-friendl
 ### Streamlit
 [![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://spellbee.streamlit.app/)
 
-### CLI/GUI
+### CLI/GUI (deprecated)
 #### Windows
 
 Just download and run the executables from the below link:
