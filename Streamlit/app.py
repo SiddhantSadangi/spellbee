@@ -9,7 +9,7 @@ import streamlit as st
 import streamlit.components.v1 as components
 
 dictionary = PyDictionary()
-VERSION = "0.2.0"
+VERSION = "0.2.1"
 
 st.set_page_config(
     page_title="Spellbee",
@@ -38,7 +38,7 @@ with st.sidebar:
         st.warning(
             "Once you have started entering an answer, do not click anywhere else on the screen before completing."
         )
-    st.components.v1.html(sidebar_html, height=550)
+    st.components.v1.html(sidebar_html, height=600)
 
 # ---------- HEADER ----------
 st.title("Welcome to Spellbee 🐝!")
@@ -95,23 +95,23 @@ def _evaluate() -> None:
 
         st.session_state.disabled["hear"] = True
 
-        lcol, mcol, rcol = st.columns([4, 1, 1])
+        c1, c2, c3, c4 = st.columns([4, 1, 1, 1])
 
-        lcol.button(
+        c1.button(
             "Restart",
             use_container_width=True,
             type="primary",
             on_click=_set_session_states,
         )
 
-        with mcol:
+        with c2:
             components.html(
-                f"""
+                """
                     <div id="fb-root"></div>
                     <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_GB/sdk.js#xfbml=1&version=v16.0" nonce="0kKz6j3l"></script>
                     <div class="fb-share-button" 
                     data-href="https://spellbee.streamlit.app/" 
-                    data-layout="button_count" 
+                    data-layout="button" 
                     data-size="large">
                     <a target="_blank" 
                     href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fspellbee.streamlit.app%2F&amp;src=sdkpreparse" 
@@ -120,7 +120,7 @@ def _evaluate() -> None:
                 """
             )
 
-        with rcol:
+        with c3:
             components.html(
                 f"""
                     <a href="https://twitter.com/share" class="twitter-share-button" 
@@ -133,6 +133,17 @@ def _evaluate() -> None:
                     Tweet
                     </a>
                     <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+                """
+            )
+
+        with c4:
+            components.html(
+                """
+                    <a href="https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2Fspellbee.streamlit.app%2F"
+                    target="_blank">
+                    <img src="https://www.jobget.com/img/Linkedin-Share-Button.png" alt="Share on LinkedIn" height="25"
+                        width="80">
+                    </a>
                 """
             )
 
