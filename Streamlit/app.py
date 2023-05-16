@@ -9,7 +9,7 @@ import streamlit as st
 import streamlit.components.v1 as components
 
 dictionary = PyDictionary()
-VERSION = "0.2.1"
+VERSION = "0.2.2"
 
 st.set_page_config(
     page_title="Spellbee",
@@ -95,54 +95,42 @@ def _evaluate() -> None:
 
         st.session_state.disabled["hear"] = True
 
-        c1, c2, c3, c4 = st.columns([4, 1, 1, 1])
-
-        c1.button(
+        st.button(
             "Restart",
             use_container_width=True,
             type="primary",
             on_click=_set_session_states,
         )
 
+        c1, c2, c3, c4, _ = st.columns([3, 1, 1, 1, 2])
+        c1.write("Share the word on social media")
         with c2:
             components.html(
                 """
-                    <div id="fb-root"></div>
-                    <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_GB/sdk.js#xfbml=1&version=v16.0" nonce="0kKz6j3l"></script>
-                    <div class="fb-share-button" 
-                    data-href="https://spellbee.streamlit.app/" 
-                    data-layout="button" 
-                    data-size="large">
-                    <a target="_blank" 
-                    href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fspellbee.streamlit.app%2F&amp;src=sdkpreparse" 
-                    class="fb-xfbml-parse-ignore">Share</a>
-                    </div>
-                """
-            )
-
-        with c3:
-            components.html(
-                f"""
-                    <a href="https://twitter.com/share" class="twitter-share-button" 
-                    data-text="Can you beat my score of {st.session_state['score']}? Post your score in the comments." 
-                    data-url="https://spellbee.streamlit.app/"
-                    data-show-count="true">
-                    data-size="Large" 
-                    data-hashtags="streamlit,python,spellbee"
-                    data-related="streamlit"
-                    Tweet
+                    <a href="https://www.facebook.com/sharer/sharer.php?kid_directed_site=0&sdk=joey&u=https%3A%2F%2Fspellbee.streamlit.app%2F&display=popup&ref=plugin&src=share_button"
+                        target="_blank">
+                        <img src="https://github.com/SiddhantSadangi/SiddhantSadangi/assets/41324509/de66032a-4ff1-4505-8960-848884a3c29e"
+                            alt="Share on Facebook" width="40" height="40">
                     </a>
-                    <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
                 """
             )
-
-        with c4:
+        with c3:
             components.html(
                 """
                     <a href="https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2Fspellbee.streamlit.app%2F"
-                    target="_blank">
-                    <img src="https://www.jobget.com/img/Linkedin-Share-Button.png" alt="Share on LinkedIn" height="25"
-                        width="80">
+                        target="_blank">
+                        <img src="https://github.com/SiddhantSadangi/SiddhantSadangi/assets/41324509/78caca71-10a3-45ac-949b-961b3ebf2429"
+                            alt="Share on LinkedIn" height="40" width="40">
+                    </a>
+                """
+            )
+        with c4:
+            components.html(
+                f"""
+                    <a href="https://twitter.com/intent/tweet?original_referer=http%3A%2F%2Flocalhost%3A8501%2F&ref_src=twsrc%5Etfw%7Ctwcamp%5Ebuttonembed%7Ctwterm%5Eshare%7Ctwgr%5E&text=Can%20you%20beat%20my%20score%20of%20{st.session_state['score']}%3F%20Try%20this%20awesome%20Streamlit%20Spellbee%20app%20and%20let%20me%20know%20your%20score%20in%20the%20comments&url=https%3A%2F%2Fspellbee.streamlit.app%2F"
+                        target="_blank">
+                        <img src="https://github.com/SiddhantSadangi/SiddhantSadangi/assets/41324509/3d3f7366-2f96-4456-8476-e6b319cdc328"
+                            alt="Share on Twitter" height="40" width="40">
                     </a>
                 """
             )
