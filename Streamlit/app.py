@@ -6,9 +6,10 @@ from gtts import gTTS
 from PyDictionary import PyDictionary
 
 import streamlit as st
+import streamlit.components.v1 as components
 
 dictionary = PyDictionary()
-VERSION = "0.1.3"
+VERSION = "0.2.0"
 
 st.set_page_config(
     page_title="Spellbee",
@@ -37,7 +38,7 @@ with st.sidebar:
         st.warning(
             "Once you have started entering an answer, do not click anywhere else on the screen before completing."
         )
-    st.components.v1.html(sidebar_html, height=450)
+    st.components.v1.html(sidebar_html, height=550)
 
 # ---------- HEADER ----------
 st.title("Welcome to Spellbee 🐝!")
@@ -94,12 +95,46 @@ def _evaluate() -> None:
 
         st.session_state.disabled["hear"] = True
 
-        st.button(
+        lcol, mcol, rcol = st.columns([4, 1, 1])
+
+        lcol.button(
             "Restart",
             use_container_width=True,
             type="primary",
             on_click=_set_session_states,
         )
+
+        with mcol:
+            components.html(
+                f"""
+                    <div id="fb-root"></div>
+                    <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_GB/sdk.js#xfbml=1&version=v16.0" nonce="0kKz6j3l"></script>
+                    <div class="fb-share-button" 
+                    data-href="https://spellbee.streamlit.app/" 
+                    data-layout="button_count" 
+                    data-size="large">
+                    <a target="_blank" 
+                    href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fspellbee.streamlit.app%2F&amp;src=sdkpreparse" 
+                    class="fb-xfbml-parse-ignore">Share</a>
+                    </div>
+                """
+            )
+
+        with rcol:
+            components.html(
+                f"""
+                    <a href="https://twitter.com/share" class="twitter-share-button" 
+                    data-text="Can you beat my score of {st.session_state['score']}? Post your score in the comments." 
+                    data-url="https://spellbee.streamlit.app/"
+                    data-show-count="true">
+                    data-size="Large" 
+                    data-hashtags="streamlit,python,spellbee"
+                    data-related="streamlit"
+                    Tweet
+                    </a>
+                    <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+                """
+            )
 
     st.session_state.disabled["get_length"] = st.session_state.disabled["define"] = True
     st.session_state.persist_audio = (
