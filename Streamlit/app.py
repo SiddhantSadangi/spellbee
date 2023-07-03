@@ -7,9 +7,13 @@ from PyDictionary import PyDictionary
 
 import streamlit as st
 import streamlit.components.v1 as components
+import pandas as pd
+import plotly.express as px
+
+from supabase import create_client, Client
 
 dictionary = PyDictionary()
-VERSION = "0.2.2"
+VERSION = "1.0.0"
 
 st.set_page_config(
     page_title="Spellbee",
@@ -40,66 +44,247 @@ with st.sidebar:
         )
     st.components.v1.html(sidebar_html, height=600)
 
-# ---------- HEADER ----------
-st.title("Welcome to Spellbee 🐝!")
+
+# ---------- Init supabase connection ------------
+@st.cache_resource
+def init_connection():
+    url = st.secrets["SUPABASE_URL"]
+    key = st.secrets["SUPABASE_KEY"]
+    return create_client(url, key)
 
 
-# --- SELECT AND PLAY WORD ----
-def _play(word: str) -> None:
-    """Pronounces `word`
+supabase = init_connection()
 
-    Args:
-        word (str): Word to be pronounced.
-        slow (bool, optional): Pronounces `word` slowly. Defaults to False.
-    """
+# ---------- USER AUTHENTICATION ----------
+if "authenticated" not in st.session_state:
+    st.session_state["authenticated"] = False
 
-    fast = gTTS(text=word, lang_check=False)
-    if os.path.exists("Streamlit/fast.mp3"):
-        os.remove("Streamlit/fast.mp3")
-    fast.save("Streamlit/fast.mp3")
-
-    slow = gTTS(text=word, slow=True, lang_check=False)
-    if os.path.exists("Streamlit/slow.mp3"):
-        os.remove("Streamlit/slow.mp3")
-    slow.save("Streamlit/slow.mp3")
+if "username" not in st.session_state:
+    st.session_state["username"] = None
 
 
-# --------- RESTART ----------
-def _set_session_states():
-    st.session_state["used_words"] = []
-    st.session_state["correct_words"] = []
-    st.session_state["score"] = 0
-    st.session_state["disabled"] = dict(
-        hear=False,
-        get_length=True,
-        define=True,
+with st.expander("Authentication", expanded=not st.session_state["authenticated"]):
+    create_tab, login_tab, guest_tab = st.tabs(
+        [
+            "Create new account :baby: ",
+            "Login to existing account :prince: ",
+            "Play as guest :ninja: ",
+        ]
     )
-    st.session_state["persist_audio"] = st.session_state[
-        "persist_definition"
-    ] = st.session_state["persist_length"] = False
+
+    ## ---------- CREATE NEW ACCOUNT ------------
+    with create_tab:
+        with st.form(key="create"):
+            username = st.text_input(
+                label="Create a unique username",
+                placeholder="Username will be visible in the global leaderboard.",
+                max_chars=50,
+                disabled=st.session_state["authenticated"],
+            )
+
+            password = st.text_input(
+                label="Create a password",
+                placeholder="Password will be stored as plain text. You won't be able to recover it if you forget.",
+                type="password",
+                max_chars=50,
+                disabled=st.session_state["authenticated"],
+            )
+
+            if st.form_submit_button(
+                label="Create account",
+                disabled=st.session_state["authenticated"],
+            ):
+                try:
+                    data, _ = (
+                        supabase.table("users")
+                        .insert({"username": username, "password": password})
+                        .execute()
+                    )
+                except Exception as e:
+                    st.error(e.message)
+                else:
+                    st.success("Account created :tada:")
+                    st.session_state["authenticated"] = True
+                    st.session_state["username"] = username
+
+    ## ---------- LOGIN TO EXISTING ACCOUNT ------------
+    with login_tab:
+        with st.form(key="login"):
+            username = st.text_input(
+                label="Enter your unique username",
+                max_chars=50,
+                disabled=st.session_state["authenticated"],
+            )
+
+            password = st.text_input(
+                label="Enter your password",
+                type="password",
+                max_chars=50,
+                disabled=st.session_state["authenticated"],
+            )
+
+            if st.form_submit_button(
+                label="Login",
+                disabled=st.session_state["authenticated"],
+                type="primary",
+            ):
+                data, _ = (
+                    supabase.table("users")
+                    .select("username, password")
+                    .eq("username", username)
+                    .eq("password", password)
+                    .execute()
+                )
+
+                if len(data[-1]) > 0:
+                    st.success("Login succeeded :tada:")
+                    st.session_state["authenticated"] = True
+                    st.session_state["username"] = username
+                else:
+                    st.error("Wrong username/password :x: ")
+
+    ## ---------- PLAY AS GUEST ----------
+    with guest_tab:
+        if st.button(
+            label="Play as a guest ⚠️ Scores won't be saved",
+            disabled=st.session_state["authenticated"],
+        ):
+            st.session_state["authenticated"] = True
 
 
-# --------- SCORE ---------
-def _evaluate() -> None:
-    if st.session_state.answer.lower().strip() == st.session_state["used_words"][-1]:
-        st.success("Correct!")
-        st.session_state.disabled["hear"] = False
-        st.session_state["correct_words"].append(st.session_state["used_words"][-1])
-        st.session_state["score"] += 1
-
+if st.session_state["authenticated"]:
+    # ---------- HEADER ----------
+    if st.session_state["username"]:
+        st.title(f"🐝 Welcome to Spellbee, {st.session_state['username']}!")
     else:
+        st.title(f"Welcome to Spellbee 🐝!")
+
+    # --- SELECT AND PLAY WORD ----
+    def play(word: str) -> None:
+        """Pronounces `word`
+
+        Args:
+            word (str): Word to be pronounced.
+            slow (bool, optional): Pronounces `word` slowly. Defaults to False.
+        """
+
+        fast = gTTS(text=word, lang_check=False)
+        if os.path.exists("Streamlit/fast.mp3"):
+            os.remove("Streamlit/fast.mp3")
+        fast.save("Streamlit/fast.mp3")
+
+        slow = gTTS(text=word, slow=True, lang_check=False)
+        if os.path.exists("Streamlit/slow.mp3"):
+            os.remove("Streamlit/slow.mp3")
+        slow.save("Streamlit/slow.mp3")
+
+    # --------- RESTART ----------
+    def set_session_states() -> None:
+        st.session_state["used_words"] = []
+        st.session_state["correct_words"] = []
+        st.session_state["score"] = 0
+        st.session_state["disabled"] = dict(
+            hear=False,
+            get_length=True,
+            define=True,
+        )
+        st.session_state["persist_audio"] = st.session_state[
+            "persist_definition"
+        ] = st.session_state["persist_length"] = False
+
+    # --------- SCORE ---------
+    def evaluate() -> None:
+        if (
+            st.session_state.answer.lower().strip()
+            == st.session_state["used_words"][-1]
+        ):
+            st.success("Correct!")
+            st.session_state.disabled["hear"] = False
+            st.session_state["correct_words"].append(st.session_state["used_words"][-1])
+            st.session_state["score"] += 1
+
+        else:
+            game_over()
+        st.session_state.disabled["get_length"] = st.session_state.disabled[
+            "define"
+        ] = True
+        st.session_state.persist_audio = (
+            st.session_state.persist_definition
+        ) = st.session_state.persist_length = False
+
+    def game_over() -> None:
         st.error(
-            f"Wrong answer. Correct spelling is \"{st.session_state['used_words'][-1]}\""
+            f"Wrong answer. Correct spelling is \"{st.session_state['used_words'][-1]}\", you guessed \"{st.session_state.answer.lower().strip()}\"."
+        )
+        st.write(
+            f"__Words correctly spelled__: {', '.join(st.session_state['correct_words'])}"
         )
         st.subheader(f"Final score: {st.session_state['score']}")
 
+        # ---------- RECORD SCORE ----------
+        if st.session_state["username"]:
+            try:
+                supabase.table("scores").insert(
+                    {
+                        "username": st.session_state["username"],
+                        "score": st.session_state["score"],
+                    }
+                ).execute()
+            except Exception as e:
+                st.error(e.message)
+            else:
+                st.success("Score saved :writing_hand: ")
+
+            # ---------- SHOW USER HISTORY ----------
+            user_scores, count = (
+                supabase.table("scores")
+                .select("*", count="exact")
+                .eq("username", st.session_state["username"])
+                .execute()
+            )
+
+            if count:
+                user_scores = user_scores[-1]
+                user_scores = (
+                    pd.DataFrame(user_scores)
+                    .sort_values(by="created_at", ascending=False)
+                    .drop(columns="username")
+                )
+
+                st.plotly_chart(
+                    px.area(
+                        user_scores,
+                        x="created_at",
+                        y="score",
+                        title="Your history 📈 ",
+                    ),
+                    use_container_width=True,
+                )
+
+        # ---------- SHOW LEADERBOARD ----------
+        scores, _ = supabase.table("scores").select("username, score").execute()
+        scores = pd.DataFrame(scores[-1])
+
+        leaderboard = (
+            scores.groupby("username")
+            .max()
+            .sort_values(by="score", ascending=False)[:10]
+            .reset_index()
+        )
+
+        st.plotly_chart(
+            px.bar(leaderboard, x="username", y="score", title="Global leaderboard 👑 "),
+            use_container_width=True,
+        )
+
+        # ---------- RESTART ----------
         st.session_state.disabled["hear"] = True
 
         st.button(
             "Restart",
             use_container_width=True,
             type="primary",
-            on_click=_set_session_states,
+            on_click=set_session_states,
         )
 
         c1, c2, c3, c4, _ = st.columns([3, 1, 1, 1, 2])
@@ -135,130 +320,120 @@ def _evaluate() -> None:
                 """
             )
 
-    st.session_state.disabled["get_length"] = st.session_state.disabled["define"] = True
-    st.session_state.persist_audio = (
-        st.session_state.persist_definition
-    ) = st.session_state.persist_length = False
-    st.write(
-        f"__Words correctly spelled__: {', '.join(st.session_state['correct_words'])}"
+    # ---------- INITIALIZING ----------
+    if "words" not in st.session_state:
+        with open("Streamlit/words.txt", "r") as f:
+            st.session_state["words"] = json.load(f)
+
+        set_session_states()
+
+    def disable_widget() -> None:
+        st.session_state.disabled = dict(
+            hear=True,
+            get_length=False,
+            define=False,
+        )
+        st.session_state.persist_audio = True
+
+    def persist_length():
+        st.session_state["persist_length"] = st.session_state.disabled[
+            "get_length"
+        ] = True
+
+    def persist_definition():
+        st.session_state["persist_definition"] = st.session_state.disabled[
+            "define"
+        ] = True
+
+    def get_word():
+        word = random.choice(st.session_state["words"])
+        if meaning_dict := dictionary.meaning(word, disable_errors=True):
+            st.session_state["used_words"].append(word)
+            st.session_state["words"].remove(word)
+            st.session_state.meaning = meaning_dict
+            play(word)
+        else:
+            get_word()
+
+    st.subheader(f"Score: {st.session_state['score']}")
+
+    r1c1, r1c2 = st.columns([1, 2])
+
+    r1c1.button(
+        "Get word",
+        on_click=disable_widget,
+        key="hear",
+        type="primary",
+        disabled=st.session_state.disabled["hear"],
+        use_container_width=True,
     )
 
+    r2c1, r2c2 = st.columns([1, 2])
 
-# ---------- INITIALIZING ----------
-if "words" not in st.session_state:
-    with open("Streamlit/words.txt", "r") as f:
-        st.session_state["words"] = json.load(f)
-
-    _set_session_states()
-
-
-def _disable_widget():
-    st.session_state.disabled = dict(
-        hear=True,
-        get_length=False,
-        define=False,
+    r2c1.button(
+        "Hear slowly",
+        key="repeat",
+        disabled=True,
+        use_container_width=True,
     )
-    st.session_state.persist_audio = True
 
+    r3c1, r3c2 = st.columns([1, 2])
 
-def _persist_length():
-    st.session_state["persist_length"] = st.session_state.disabled["get_length"] = True
+    r3c1.button(
+        "Get word length",
+        on_click=persist_length,
+        key="get_length",
+        disabled=st.session_state.disabled["get_length"],
+        use_container_width=True,
+    )
 
+    r4c1, r4c2 = st.columns([1, 2])
 
-def _persist_definition():
-    st.session_state["persist_definition"] = st.session_state.disabled["define"] = True
+    r4c1.button(
+        "Get definition",
+        on_click=persist_definition,
+        key="define",
+        disabled=st.session_state.disabled["define"],
+        use_container_width=True,
+    )
 
+    if any(
+        [
+            st.session_state.persist_audio,
+            st.session_state.persist_length,
+            st.session_state.persist_definition,
+            st.session_state.get_length,
+            st.session_state.hear,
+        ]
+    ):
+        if st.session_state.hear:
+            get_word()
 
-def _get_word():
-    word = random.choice(st.session_state["words"])
-    if meaning_dict := dictionary.meaning(word, disable_errors=True):
-        st.session_state["used_words"].append(word)
-        st.session_state["words"].remove(word)
-        st.session_state.meaning = meaning_dict
-        _play(word)
-    else:
-        _get_word()
+        word = st.session_state["used_words"][-1]
 
+        if st.session_state.persist_audio:
+            r1c2.audio("Streamlit/fast.mp3", format="audio/mpeg")
+            r2c2.audio("Streamlit/slow.mp3", format="audio/mpeg")
 
-st.subheader(f"Score: {st.session_state['score']}")
+        if st.session_state.persist_length:
+            r3c2.markdown(
+                f'<span style="font-weight:700;font-size:20px">{len(word)}</span>',
+                unsafe_allow_html=True,
+            )
 
-r1c1, r1c2 = st.columns([1, 2])
+        if st.session_state.persist_definition:
+            r4c2.markdown(
+                "<br>".join(
+                    f"{item}: {meaning}"
+                    for item, meaning in st.session_state.meaning.items()
+                ),
+                unsafe_allow_html=True,
+            )
 
-r1c1.button(
-    "Get word",
-    on_click=_disable_widget,
-    key="hear",
-    type="primary",
-    disabled=st.session_state.disabled["hear"],
-    use_container_width=True,
-)
-
-r2c1, r2c2 = st.columns([1, 2])
-
-r2c1.button(
-    "Hear slowly",
-    key="repeat",
-    disabled=True,
-    use_container_width=True,
-)
-
-r3c1, r3c2 = st.columns([1, 2])
-
-r3c1.button(
-    "Get word length",
-    on_click=_persist_length,
-    key="get_length",
-    disabled=st.session_state.disabled["get_length"],
-    use_container_width=True,
-)
-
-r4c1, r4c2 = st.columns([1, 2])
-
-r4c1.button(
-    "Get definition",
-    on_click=_persist_definition,
-    key="define",
-    disabled=st.session_state.disabled["define"],
-    use_container_width=True,
-)
-
-if any(
-    [
-        st.session_state.persist_audio,
-        st.session_state.persist_length,
-        st.session_state.persist_definition,
-        st.session_state.get_length,
-        st.session_state.hear,
-    ]
-):
-    if st.session_state.hear:
-        _get_word()
-
-    word = st.session_state["used_words"][-1]
-
-    if st.session_state.persist_audio:
-        r1c2.audio("Streamlit/fast.mp3", format="audio/mpeg")
-        r2c2.audio("Streamlit/slow.mp3", format="audio/mpeg")
-
-    if st.session_state.persist_length:
-        r3c2.markdown(
-            f'<span style="font-weight:700;font-size:20px">{len(word)}</span>',
-            unsafe_allow_html=True,
+        st.text_input(
+            "Type spelling and press enter to evaluate",
+            key="answer",
+            on_change=evaluate,
         )
 
-    if st.session_state.persist_definition:
-        r4c2.markdown(
-            "<br>".join(
-                f"{item}: {meaning}"
-                for item, meaning in st.session_state.meaning.items()
-            ),
-            unsafe_allow_html=True,
-        )
-
-    st.text_input(
-        "Type spelling and press enter to evaluate",
-        key="answer",
-        on_change=_evaluate,
-    )
-
-    # Nothing after this will be executed
+        # Nothing after this will be executed
