@@ -13,7 +13,7 @@ import plotly.express as px
 from supabase import create_client, Client
 
 dictionary = PyDictionary()
-VERSION = "1.0.0"
+VERSION = "1.0.1"
 
 st.set_page_config(
     page_title="Spellbee",
@@ -38,9 +38,6 @@ with st.sidebar:
             '3. Click on the ▶️ button next to "Hear slowly" to hear the word in slow speed\n'
             '4. Type the spelling in the text box and press "Enter" to evaluate\n'
             "5. If the answer is correct, repeat from step 1. Else restart."
-        )
-        st.warning(
-            "Once you have started entering an answer, do not click anywhere else on the screen before completing."
         )
     st.components.v1.html(sidebar_html, height=600)
 
@@ -256,6 +253,7 @@ if st.session_state["authenticated"]:
                         user_scores,
                         x="created_at",
                         y="score",
+                        markers=True,
                         title="Your history 📈 ",
                     ),
                     use_container_width=True,
@@ -273,7 +271,12 @@ if st.session_state["authenticated"]:
         )
 
         st.plotly_chart(
-            px.bar(leaderboard, x="username", y="score", title="Global leaderboard 👑 "),
+            px.bar(
+                leaderboard,
+                x="username",
+                y="score",
+                title="Global leaderboard 👑 ",
+            ),
             use_container_width=True,
         )
 
@@ -335,17 +338,17 @@ if st.session_state["authenticated"]:
         )
         st.session_state.persist_audio = True
 
-    def persist_length():
+    def persist_length() -> None:
         st.session_state["persist_length"] = st.session_state.disabled[
             "get_length"
         ] = True
 
-    def persist_definition():
+    def persist_definition() -> None:
         st.session_state["persist_definition"] = st.session_state.disabled[
             "define"
         ] = True
 
-    def get_word():
+    def get_word() -> None:
         word = random.choice(st.session_state["words"])
         if meaning_dict := dictionary.meaning(word, disable_errors=True):
             st.session_state["used_words"].append(word)
@@ -431,7 +434,7 @@ if st.session_state["authenticated"]:
             )
 
         st.text_input(
-            "Type spelling and press enter to evaluate",
+            "Type spelling and press enter to evaluate. ⚠️ Clicking anywhere else after you start typing will submit the answer. ",
             key="answer",
             on_change=evaluate,
         )
