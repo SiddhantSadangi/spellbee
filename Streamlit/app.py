@@ -13,7 +13,7 @@ import plotly.express as px
 from supabase import create_client, Client
 
 dictionary = PyDictionary()
-VERSION = "1.0.1"
+VERSION = "1.1.0"
 
 st.set_page_config(
     page_title="Spellbee",
@@ -148,7 +148,6 @@ with st.expander("Authentication", expanded=not st.session_state["authenticated"
         ):
             st.session_state["authenticated"] = True
 
-
 if st.session_state["authenticated"]:
     # ---------- HEADER ----------
     if st.session_state["username"]:
@@ -241,24 +240,7 @@ if st.session_state["authenticated"]:
             )
 
             if count:
-                user_scores = user_scores[-1]
-                user_scores = (
-                    pd.DataFrame(user_scores)
-                    .sort_values(by="created_at", ascending=False)
-                    .drop(columns="username")
-                )
-
-                st.plotly_chart(
-                    px.area(
-                        user_scores,
-                        x="created_at",
-                        y="score",
-                        markers=True,
-                        title="Your history 📈 ",
-                    ),
-                    use_container_width=True,
-                )
-
+                user_history_plot(user_scores)
         # ---------- SHOW LEADERBOARD ----------
         scores, _ = supabase.table("scores").select("username, score").execute()
         scores = pd.DataFrame(scores[-1])
@@ -322,6 +304,31 @@ if st.session_state["authenticated"]:
                     </a>
                 """
             )
+
+    def user_history_plot(user_scores) -> None:
+        user_scores = user_scores[-1]
+        user_scores = (
+            pd.DataFrame(user_scores)
+            .sort_values(by="created_at")
+            .drop(columns="username")
+        )
+
+        user_scores["Date"] = pd.to_datetime(user_scores["created_at"]).dt.strftime(
+            "%Y-%m-%d %H:%M:%S"
+        )
+
+        fig = px.bar(
+            user_scores,
+            x="Date",
+            y="score",
+            title="Your history 📊 ",
+        )
+        fig.update_xaxes(type="category")
+
+        st.plotly_chart(
+            fig,
+            use_container_width=True,
+        )
 
     # ---------- INITIALIZING ----------
     if "words" not in st.session_state:
