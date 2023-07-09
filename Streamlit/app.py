@@ -10,10 +10,10 @@ import streamlit.components.v1 as components
 import pandas as pd
 import plotly.express as px
 
-from supabase import create_client, Client
+from supabase import create_client
 
 dictionary = PyDictionary()
-VERSION = "1.1.0"
+VERSION = "1.2.0"
 
 st.set_page_config(
     page_title="Spellbee",
@@ -305,7 +305,7 @@ if st.session_state["authenticated"]:
                 """
             )
 
-    def user_history_plot(user_scores) -> None:
+    def user_history_plot(user_scores: dict) -> None:
         user_scores = user_scores[-1]
         user_scores = (
             pd.DataFrame(user_scores)
@@ -416,34 +416,44 @@ if st.session_state["authenticated"]:
             st.session_state.hear,
         ]
     ):
-        if st.session_state.hear:
-            get_word()
+        with st.form(key="main"):
+            if st.session_state.hear:
+                get_word()
 
-        word = st.session_state["used_words"][-1]
+            word = st.session_state["used_words"][-1]
 
-        if st.session_state.persist_audio:
-            r1c2.audio("Streamlit/fast.mp3", format="audio/mpeg")
-            r2c2.audio("Streamlit/slow.mp3", format="audio/mpeg")
+            if st.session_state.persist_audio:
+                r1c2.audio("Streamlit/fast.mp3", format="audio/mpeg")
+                r2c2.audio("Streamlit/slow.mp3", format="audio/mpeg")
 
-        if st.session_state.persist_length:
-            r3c2.markdown(
-                f'<span style="font-weight:700;font-size:20px">{len(word)}</span>',
-                unsafe_allow_html=True,
+            if st.session_state.persist_length:
+                r3c2.markdown(
+                    f'<span style="font-weight:700;font-size:20px">{len(word)}</span>',
+                    unsafe_allow_html=True,
+                )
+
+            if st.session_state.persist_definition:
+                r4c2.markdown(
+                    "<br>".join(
+                        f"{item}: {meaning}"
+                        for item, meaning in st.session_state.meaning.items()
+                    ),
+                    unsafe_allow_html=True,
+                )
+
+            lcol, rcol = st.columns([4, 1])
+            lcol.text_input(
+                label="Input",
+                placeholder='Type spelling and press "Evaluate"',
+                key="answer",
+                label_visibility="collapsed",
             )
 
-        if st.session_state.persist_definition:
-            r4c2.markdown(
-                "<br>".join(
-                    f"{item}: {meaning}"
-                    for item, meaning in st.session_state.meaning.items()
-                ),
-                unsafe_allow_html=True,
+            rcol.form_submit_button(
+                "Evaluate",
+                on_click=evaluate,
+                type="primary",
+                use_container_width=True,
             )
 
-        st.text_input(
-            "Type spelling and press enter to evaluate. ⚠️ Clicking anywhere else after you start typing will submit the answer. ",
-            key="answer",
-            on_change=evaluate,
-        )
-
-        # Nothing after this will be executed
+            # Nothing after this will be executed
