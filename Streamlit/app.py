@@ -10,10 +10,9 @@ import streamlit.components.v1 as components
 from st_login_form import login_form
 import pandas as pd
 import plotly.express as px
-import supabase
 
 dictionary = PyDictionary()
-VERSION = "1.3.2"
+VERSION = "1.3.3"
 
 st.set_page_config(
     page_title="Spellbee",
@@ -42,7 +41,7 @@ with st.sidebar:
     st.components.v1.html(sidebar_html, height=600)
 
 
-login_form(
+client = login_form(
     create_username_placeholder="Username will be visible in the global leaderboard.",
     create_password_placeholder="⚠️ Password will be stored as plain text. You won't be able to recover it if you forget.",
     guest_submit_label="Play as a guest ⚠️ Scores won't be saved",
@@ -120,7 +119,7 @@ if st.session_state["authenticated"]:
         # ---------- RECORD SCORE ----------
         if st.session_state["username"]:
             try:
-                supabase.table("scores").insert(
+                client.table("scores").insert(
                     {
                         "username": st.session_state["username"],
                         "score": st.session_state["score"],
@@ -133,7 +132,7 @@ if st.session_state["authenticated"]:
 
             # ---------- SHOW USER HISTORY ----------
             user_scores, count = (
-                supabase.table("scores")
+                client.table("scores")
                 .select("*", count="exact")
                 .eq("username", st.session_state["username"])
                 .execute()
@@ -142,7 +141,7 @@ if st.session_state["authenticated"]:
             if count:
                 user_history_plot(user_scores)
         # ---------- SHOW LEADERBOARD ----------
-        scores, _ = supabase.table("scores").select("username, score").execute()
+        scores, _ = client.table("scores").select("username, score").execute()
         scores = pd.DataFrame(scores[-1])
 
         leaderboard = (
