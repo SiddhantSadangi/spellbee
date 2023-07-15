@@ -2,6 +2,6 @@ futures<3.0.0
 gTTS
 PyDictionary
 streamlit
-supabase
 pandas
 plotly
+st-login-form

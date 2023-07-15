@@ -7,13 +7,12 @@ from PyDictionary import PyDictionary
 
 import streamlit as st
 import streamlit.components.v1 as components
+from st_login_form import login_form
 import pandas as pd
 import plotly.express as px
 
-from supabase import create_client
-
 dictionary = PyDictionary()
-VERSION = "1.2.0"
+VERSION = "1.2.1"
 
 st.set_page_config(
     page_title="Spellbee",
@@ -42,112 +41,13 @@ with st.sidebar:
     st.components.v1.html(sidebar_html, height=600)
 
 
-# ---------- Init supabase connection ------------
-@st.cache_resource
-def init_connection():
-    url = st.secrets["SUPABASE_URL"]
-    key = st.secrets["SUPABASE_KEY"]
-    return create_client(url, key)
+login_form(
+    create_username_placeholder="Username will be visible in the global leaderboard.",
+    create_password_placeholder="⚠️ Password will be stored as plain text. You won't be able to recover it if you forget.",
+    guest_submit_label="Play as a guest ⚠️ Scores won't be saved",
+)
 
-
-supabase = init_connection()
-
-# ---------- USER AUTHENTICATION ----------
-if "authenticated" not in st.session_state:
-    st.session_state["authenticated"] = False
-
-if "username" not in st.session_state:
-    st.session_state["username"] = None
-
-
-with st.expander("Authentication", expanded=not st.session_state["authenticated"]):
-    create_tab, login_tab, guest_tab = st.tabs(
-        [
-            "Create new account :baby: ",
-            "Login to existing account :prince: ",
-            "Play as guest :ninja: ",
-        ]
-    )
-
-    ## ---------- CREATE NEW ACCOUNT ------------
-    with create_tab:
-        with st.form(key="create"):
-            username = st.text_input(
-                label="Create a unique username",
-                placeholder="Username will be visible in the global leaderboard.",
-                max_chars=50,
-                disabled=st.session_state["authenticated"],
-            )
-
-            password = st.text_input(
-                label="Create a password",
-                placeholder="Password will be stored as plain text. You won't be able to recover it if you forget.",
-                type="password",
-                max_chars=50,
-                disabled=st.session_state["authenticated"],
-            )
-
-            if st.form_submit_button(
-                label="Create account",
-                disabled=st.session_state["authenticated"],
-            ):
-                try:
-                    data, _ = (
-                        supabase.table("users")
-                        .insert({"username": username, "password": password})
-                        .execute()
-                    )
-                except Exception as e:
-                    st.error(e.message)
-                else:
-                    st.success("Account created :tada:")
-                    st.session_state["authenticated"] = True
-                    st.session_state["username"] = username
-
-    ## ---------- LOGIN TO EXISTING ACCOUNT ------------
-    with login_tab:
-        with st.form(key="login"):
-            username = st.text_input(
-                label="Enter your unique username",
-                max_chars=50,
-                disabled=st.session_state["authenticated"],
-            )
-
-            password = st.text_input(
-                label="Enter your password",
-                type="password",
-                max_chars=50,
-                disabled=st.session_state["authenticated"],
-            )
-
-            if st.form_submit_button(
-                label="Login",
-                disabled=st.session_state["authenticated"],
-                type="primary",
-            ):
-                data, _ = (
-                    supabase.table("users")
-                    .select("username, password")
-                    .eq("username", username)
-                    .eq("password", password)
-                    .execute()
-                )
-
-                if len(data[-1]) > 0:
-                    st.success("Login succeeded :tada:")
-                    st.session_state["authenticated"] = True
-                    st.session_state["username"] = username
-                else:
-                    st.error("Wrong username/password :x: ")
-
-    ## ---------- PLAY AS GUEST ----------
-    with guest_tab:
-        if st.button(
-            label="Play as a guest ⚠️ Scores won't be saved",
-            disabled=st.session_state["authenticated"],
-        ):
-            st.session_state["authenticated"] = True
-
+st.write(st.session_state["username"])
 if st.session_state["authenticated"]:
     # ---------- HEADER ----------
     if st.session_state["username"]:
