@@ -10,9 +10,10 @@ import streamlit.components.v1 as components
 from st_login_form import login_form
 import pandas as pd
 import plotly.express as px
+import supabase
 
 dictionary = PyDictionary()
-VERSION = "1.3.1"
+VERSION = "1.3.2"
 
 st.set_page_config(
     page_title="Spellbee",
