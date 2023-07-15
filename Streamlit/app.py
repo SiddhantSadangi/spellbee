@@ -12,7 +12,7 @@ import pandas as pd
 import plotly.express as px
 
 dictionary = PyDictionary()
-VERSION = "1.2.1"
+VERSION = "1.3.1"
 
 st.set_page_config(
     page_title="Spellbee",
