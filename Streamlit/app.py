@@ -47,7 +47,6 @@ login_form(
     guest_submit_label="Play as a guest ⚠️ Scores won't be saved",
 )
 
-st.write(st.session_state["username"])
 if st.session_state["authenticated"]:
     # ---------- HEADER ----------
     if st.session_state["username"]:
