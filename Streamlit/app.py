@@ -12,7 +12,7 @@ import pandas as pd
 import plotly.express as px
 
 dictionary = PyDictionary()
-VERSION = "1.3.3"
+VERSION = "1.3.4"
 
 st.set_page_config(
     page_title="Spellbee",
@@ -45,6 +45,10 @@ client = login_form(
     create_username_placeholder="Username will be visible in the global leaderboard.",
     create_password_placeholder="⚠️ Password will be stored as plain text. You won't be able to recover it if you forget.",
     guest_submit_label="Play as a guest ⚠️ Scores won't be saved",
+    login_error_message="""
+    :x: Wrong username/password.\n 
+    If you think this is error, please contact drop a mail to siddhant.sadangi@gmail.com with your username.
+    """,
 )
 
 if st.session_state["authenticated"]:
