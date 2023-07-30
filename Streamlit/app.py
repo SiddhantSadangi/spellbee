@@ -42,6 +42,7 @@ with st.sidebar:
 
 
 client = login_form(
+    user_tablename="spellbee_users",
     create_username_placeholder="Username will be visible in the global leaderboard.",
     create_password_placeholder="⚠️ Password will be stored as plain text. You won't be able to recover it if you forget.",
     guest_submit_label="Play as a guest ⚠️ Scores won't be saved",
